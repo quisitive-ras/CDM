@@ -67,10 +67,11 @@ namespace Microsoft.CommonDataModel.ObjectModel.Cdm
         /// </summary>
         internal string VirtualLocation { get; set; }
 
+        [Obsolete]
         /// <inheritdoc />
         public string GetName()
         {
-            return this.ManifestName;
+            return this.Name;
         }
 
         internal string GetObjectPath()
@@ -560,9 +561,14 @@ namespace Microsoft.CommonDataModel.ObjectModel.Cdm
                         {
                             await entity.FileStatusCheckAsync();
                         }
-                        else if (entity is CdmLocalEntityDeclarationDefinition)
+                        else if (entity is CdmLocalEntityDeclarationDefinition localEntity)
                         {
-                            await (entity as CdmLocalEntityDeclarationDefinition).FileStatusCheckAsync(partitionFileStatusCheckType, incrementalType, fileStatusCheckOptions);
+                            bool shouldContinue = await localEntity.FileStatusCheckAsyncInternal(partitionFileStatusCheckType, incrementalType, fileStatusCheckOptions);
+
+                            if (!shouldContinue)
+                            {
+                                return;
+                            }
                         }
                     }
 
